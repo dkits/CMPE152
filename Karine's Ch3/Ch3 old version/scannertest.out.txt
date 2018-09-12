@@ -1,0 +1,153 @@
+001 {This is a comment.}
+002 
+003 {This is a comment
+004  that spans several
+005  source lines.}
+006 
+007 Two{comments in}{a row} here
+>>> IDENTIFIER      line=007, pos= 0, text="Two"
+>>> IDENTIFIER      line=007, pos=24, text="here"
+008 
+009 {Word tokens}
+010 Hello world
+>>> IDENTIFIER      line=010, pos= 0, text="Hello"
+>>> IDENTIFIER      line=010, pos= 6, text="world"
+011 begin BEGIN Begin BeGiN begins
+>>> BEGIN           line=011, pos= 0, text="begin"
+>>> BEGIN           line=011, pos= 6, text="BEGIN"
+>>> BEGIN           line=011, pos=12, text="Begin"
+>>> BEGIN           line=011, pos=18, text="BeGiN"
+>>> IDENTIFIER      line=011, pos=24, text="begins"
+012 
+013 {String tokens}
+014 'Hello, world.'
+>>> STRING          line=014, pos= 0, text="'Hello, world.'"
+>>>                 value="Hello, world."
+015 'It''s Friday!'
+>>> STRING          line=015, pos= 0, text="'It''s Friday!'"
+>>>                 value="It's Friday!"
+016 ''
+>>> STRING          line=016, pos= 0, text="''"
+>>>                 value=""
+017 ' '' '' '   ''''''
+>>> STRING          line=017, pos= 0, text="' '' '' '"
+>>>                 value=" ' ' "
+>>> STRING          line=017, pos=12, text="''''''"
+>>>                 value="''"
+018 'This string
+019 spans
+020 source lines.'
+>>> STRING          line=018, pos= 0, text="'This string spans source lines.'"
+>>>                 value="This string spans source lines."
+021 
+022 {Special symbol tokens}
+023 + - * / := . , ; : = <> < <= >= > ( ) [ ] { } } ^ ..
+>>> PLUS            line=023, pos= 0, text="+"
+>>> MINUS           line=023, pos= 2, text="-"
+>>> STAR            line=023, pos= 4, text="*"
+>>> SLASH           line=023, pos= 6, text="/"
+>>> COLON_EQUALS    line=023, pos= 8, text=":="
+>>> DOT             line=023, pos=11, text="."
+>>> COMMA           line=023, pos=13, text=","
+>>> SEMICOLON       line=023, pos=15, text=";"
+>>> COLON           line=023, pos=17, text=":"
+>>> EQUALS          line=023, pos=19, text="="
+>>> NOT_EQUALS      line=023, pos=21, text="<>"
+>>> LESS_THAN       line=023, pos=24, text="<"
+>>> LESS_EQUALS     line=023, pos=26, text="<="
+>>> GREATER_EQUALS  line=023, pos=29, text=">="
+>>> GREATER_THAN    line=023, pos=32, text=">"
+>>> LEFT_PAREN      line=023, pos=34, text="("
+>>> RIGHT_PAREN     line=023, pos=36, text=")"
+>>> LEFT_BRACKET    line=023, pos=38, text="["
+>>> RIGHT_BRACKET   line=023, pos=40, text="]"
+>>> RIGHT_BRACE     line=023, pos=46, text="}"
+>>> UP_ARROW        line=023, pos=48, text="^"
+>>> DOT_DOT         line=023, pos=50, text=".."
+024 +-:=<>=<==.....
+>>> PLUS            line=024, pos= 0, text="+"
+>>> MINUS           line=024, pos= 1, text="-"
+>>> COLON_EQUALS    line=024, pos= 2, text=":="
+>>> NOT_EQUALS      line=024, pos= 4, text="<>"
+>>> EQUALS          line=024, pos= 6, text="="
+>>> LESS_EQUALS     line=024, pos= 7, text="<="
+>>> EQUALS          line=024, pos= 9, text="="
+>>> DOT_DOT         line=024, pos=10, text=".."
+>>> DOT_DOT         line=024, pos=12, text=".."
+>>> DOT             line=024, pos=14, text="."
+025 
+026 {Number tokens}
+027 0 1 20 00000000000000000032  31415926
+>>> INTEGER         line=027, pos= 0, text="0"
+>>>                 value=0
+>>> INTEGER         line=027, pos= 2, text="1"
+>>>                 value=1
+>>> INTEGER         line=027, pos= 4, text="20"
+>>>                 value=20
+>>> INTEGER         line=027, pos= 7, text="00000000000000000032"
+>>>                 value=32
+>>> INTEGER         line=027, pos=29, text="31415926"
+>>>                 value=31415926
+028 3.1415926  3.1415926535897932384626433
+>>> REAL            line=028, pos= 0, text="3.1415926"
+>>>                 value=3.141593
+>>> REAL            line=028, pos=11, text="3.1415926535897932384626433"
+>>>                 value=3.141593
+029 0.00031415926E4  0.00031415926e+00004  31415.926e-4
+>>> REAL            line=029, pos= 0, text="0.00031415926E4"
+>>>                 value=3.141593
+>>> REAL            line=029, pos=17, text="0.00031415926e+00004"
+>>>                 value=3.141593
+>>> REAL            line=029, pos=39, text="31415.926e-4"
+>>>                 value=3.141593
+030 3141592600000000000000000000000e-30
+>>> REAL            line=030, pos= 0, text="3141592600000000000000000000000e-30"
+>>>                 value=3.141593
+031 
+032 {Decimal point or ..}
+033 3.14  3..14
+>>> REAL            line=033, pos= 0, text="3.14"
+>>>                 value=3.140000
+>>> INTEGER         line=033, pos= 6, text="3"
+>>>                 value=3
+>>> DOT_DOT         line=033, pos= 7, text=".."
+>>> INTEGER         line=033, pos= 9, text="14"
+>>>                 value=14
+034 
+035 {Bad tokens}
+036 123e99  123456789012345  1234.56E.  3.  5..  .14  314.e-2
+    ^
+*** Real literal out of range [at "123e99"]
+            ^
+*** Integer literal out of range [at "123456789012345"]
+                             ^
+*** Invalid number [at "1234.56E"]
+>>> DOT             line=036, pos=33, text="."
+                                        ^
+*** Invalid number [at "3."]
+>>> INTEGER         line=036, pos=40, text="5"
+>>>                 value=5
+>>> DOT_DOT         line=036, pos=41, text=".."
+>>> DOT             line=036, pos=45, text="."
+>>> INTEGER         line=036, pos=46, text="14"
+>>>                 value=14
+                                                      ^
+*** Invalid number [at "314."]
+>>> IDENTIFIER      line=036, pos=54, text="e"
+>>> MINUS           line=036, pos=55, text="-"
+>>> INTEGER         line=036, pos=56, text="2"
+>>>                 value=2
+037 What?
+>>> IDENTIFIER      line=037, pos= 0, text="What"
+        ^
+*** Invalid character [at "?"]
+038 'String not closed
+    ^
+*** Unexpected end of file [at "'String not closed "]
+
+                  38 source lines.
+                   7 syntax errors.
+                0.03 seconds total parsing time.
+
+                   0 instructions generated.
+                0.00 seconds total code generation time.
