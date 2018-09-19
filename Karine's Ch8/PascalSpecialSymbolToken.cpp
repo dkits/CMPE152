@@ -1,6 +1,6 @@
 /**
  * <h1>PascalSpecialSymbolToken</h1>
- *Edited by K
+ *
  * <p> Pascal special symbol tokens.</p>
  *
  * <p>Copyright (c) 2017 by Ronald Mak</p>
@@ -33,14 +33,28 @@ void PascalSpecialSymbolToken::extract() throw (string)
     {
         // Single-character special symbols.
         case '+':  case '-':  case '*':  case '/':  case ',':
-        case ';':  case '\'': case '=':  case '(':  case ')':
-        case '[':  case ']':  case '{':  case '}':  case '^': case '=>':
+        case ';':  case '\'': case '(':  case ')':
+        case '[':  case ']':  case '{':  case '}':  case '^':
         {
             next_char();  // consume character
             break;
         }
 
+        // = or =>
+        case '=':
+        {
+            current_ch = next_char();  // consume ':';
+
+            if (current_ch == '>')
+            {
+                text += current_ch;
+                next_char();  // consume '='
+            }
+
+            break;
+        }
         // : or :=
+
         case ':':
         {
             current_ch = next_char();  // consume ':';
