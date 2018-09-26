@@ -1,0 +1,17 @@
+BEGIN {CASE statements}
+
+    i := 5; 
+    k := 2; 
+
+   
+ 	WHEN 
+    i+1 = 3 => j := 3;
+	WHEN i+1 = 4 => j := 5;
+	WHEN i+1 = 5 => j := 7;
+	WHEN i+1 = 6 => j := 2*7;
+	j := -1
+	
+	
+	
+
+END.
