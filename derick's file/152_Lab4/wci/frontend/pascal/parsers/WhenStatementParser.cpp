@@ -59,11 +59,11 @@ WhenStatementParser::WhenStatementParser(PascalParserTD *parent)
 ICodeNode *WhenStatementParser::parse_statement(Token *token) throw (string)
 {
     token = next_token(token);  // consume the WHEN
+    bool otherwiseCheck = true;
+    ICodeNode *if_node =
+        	            ICodeFactory::create_icode_node((ICodeNodeType) NT_IF);
 
     // Create an IF node.
-        ICodeNode *if_node =
-                ICodeFactory::create_icode_node((ICodeNodeType) NT_IF);
-
 
         // Parse the expression.
         // The IF node adopts the expression subtree as its first child.
@@ -77,26 +77,91 @@ ICodeNode *WhenStatementParser::parse_statement(Token *token) throw (string)
             token = next_token(token);  // consume the THEN_EQUALS
         }
         else {
-            error_handler.flag(token, MISSING_THEN, this);
+            error_handler.flag(token, MISSING_THEN_EQUALS, this);
         }
 
-        // Parse the THEN statement.
+        // Parse the => statement.
         // The IF node adopts the statement subtree as its second child.
         StatementParser statement_parser(this);
         if_node->add_child(statement_parser.parse_statement(token));
         token = current_token();
 
         // Look for an ;.
+
         if (token->get_type() == (TokenType) PT_SEMICOLON)
         {
             token = next_token(token);  // consume the ;
-
-            // Parse the ELSE statement.
-            // The IF node adopts the statement subtree as its third child.
-            if_node->add_child(statement_parser.parse_statement(token));
         }
+        //New Parent temp that points to the original if node
+        ICodeNode *parent_temp_if_node = if_node;
+        //Run through the code again with a new node
+        while ((token != nullptr) &&
+                   (token->get_type() != (TokenType) PT_END)){
+        	ICodeNode *temp_if_node =
+        	                	     ICodeFactory::create_icode_node((ICodeNodeType) NT_IF);
 
+        	temp_if_node->add_child(expression_parser.parse_statement(token));
+
+        	        // Synchronize at the =>.
+			token = synchronize(THEN_EQUALS_SET);
+			if (token->get_type() == (TokenType) PT_THEN_EQUALS)
+			{
+				token = next_token(token);  // consume the THEN_EQUALS
+			}
+			else {
+				error_handler.flag(token, MISSING_THEN_EQUALS, this);
+			}
+
+			// Parse the => statement.
+			// The IF node adopts the statement subtree as its second child.
+			StatementParser statement_parser(this);
+			temp_if_node->add_child(statement_parser.parse_statement(token));
+			token = current_token();
+	        if (token->get_type() == (TokenType) PT_SEMICOLON)
+	        {
+	            token = next_token(token);  // consume the ;
+
+	        }
+			// Look for an ;.
+	        if(token->get_type() == (TokenType) PT_OTHERWISE)
+	        {
+				token = next_token(token);  // consume the OTHERWISE
+				token = synchronize(THEN_EQUALS_SET);
+				if (token->get_type() == (TokenType) PT_THEN_EQUALS)
+				{
+					token = next_token(token);  // consume the THEN_EQUALS
+				}
+				else {
+					error_handler.flag(token, MISSING_THEN_EQUALS, this);
+				}
+
+				// Parse the => statement.
+				// The IF node adopts the statement subtree as its second child.
+				temp_if_node->add_child(statement_parser.parse_statement(token));
+				token = current_token();
+				otherwiseCheck = false;
+
+			}
+	        //WHEN statement requires an otherwise at the end
+	        //The node is added to the parent node
+	        //and the parent node is then reseted for another loop
+	        parent_temp_if_node ->add_child(temp_if_node);
+	        parent_temp_if_node = temp_if_node;
+
+
+
+        }
+        //THere should always be a otherwise for WHEN
+        if(otherwiseCheck){
+			error_handler.flag(token, MISSING_OTHERWISE, this);
+		}
+        if (token->get_type() == (TokenType) PT_END)
+		{
+			token = next_token(token);  // consume END
+		}
         return if_node;
+
+
 }
 
 

@@ -51,7 +51,7 @@ ICodeNode *StatementParser::parse_statement(Token *token) throw (string)
 {
     ICodeNode *statement_node = nullptr;
     int line_number = token->get_line_number();
-
+    bool x = false;
     switch ((PascalTokenType) token->get_type())
     {
         case PT_BEGIN:
@@ -106,10 +106,11 @@ ICodeNode *StatementParser::parse_statement(Token *token) throw (string)
         }
         case PT_WHEN:
 	   {
-		   WhenStatementParser assignment_parser(this);
-		   statement_node = assignment_parser.parse_statement(token);
+		   WhenStatementParser when_parser(this);
+		   statement_node = when_parser.parse_statement(token);
 		   break;
 	   }
+
 
         default:
         {
