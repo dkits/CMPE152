@@ -1,0 +1,51 @@
+193
+a = 5; b = 6
+c = false; x = 12;
+a+b*2
+(1+2)*3
+if (a == 5) {
+	d = 12
+} 
+else if (a == 4){
+	d = 1
+}
+else{
+	d = 2
+}
+while(x > 1){
+x = x - 1
+}
+
+void proc_one_print(output)
+{
+line = output
+}
+
+proc_one_print("language is C++ subset")
+
+void proc_two_eq(id#)
+{
+x=a-b
+}
+
+proc_two_eq(c)
+
+in func_one_eq(id#)
+{
+z=w+x
+return(x)
+}
+
+func_one_eq(f)
+
+in func_two_line(sentence)
+{
+language = sentence
+return(language)
+}
+
+func_two_line("C++ subset")
+
+
+
+
