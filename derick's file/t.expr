@@ -1,8 +1,6 @@
-193
-a = 5; b = 6
-c = false; x = 12;
-a+b*2
-(1+2)*3
+193;
+a = 5; b = 6;
+c = false;
 if (a == 5) {
 	d = 12;
 } 
@@ -14,4 +12,9 @@ else{
 }
 while(x > 1){
 x = x - 1;
+x = x - 2;
+x = x - 3;
+}
+void proc_two_eq(help){
+x = 2;
 }
