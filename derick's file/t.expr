@@ -15,6 +15,6 @@ x = x - 1;
 x = x - 2;
 x = x - 3;
 }
-void proc_two_eq(help){
+void proc_two_eq(help, we, yt, LOL, WAT){
 x = 2;
 }
