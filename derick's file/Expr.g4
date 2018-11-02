@@ -8,7 +8,9 @@ stat:   expr ';'
     |	'{' ID '=' expr ';' (stat+)? '}'
     | 	if_stat
     |	while_stat
-    |	procedure
+    |	function
+    |	func_call
+    |	'return' expr? ';'
     ;
     
 if_stat:   'if' expr stat  
@@ -16,19 +18,23 @@ if_stat:   'if' expr stat
     	  
 while_stat: 'while' expr  stat ;
 
-procedure: 'void' ID  expr '#'?  stat  //pass by value procedure
-	;
+function: func_synt ID  expr stat ; //pass by value procedure
+	
+func_call: ID expr ';';
 
 expr:   expr ('*'|'/') expr   
     |   expr ('+'|'-') expr
     |   expr ('=='|'>='|'<='|'>'|'<') expr   
-    |   INT                    
-    |   ID (','expr)?
-    |	BOOL                       
+    |   '#'? INT (',' '#'? expr )?                    
+    |   '#'? ID  (',' '#'? expr )?
+    |	'#'? BOOL(',' '#'? expr )?                       
     |   '(' expr ')'         
     ;
-    
-
+func_synt
+	:	'void'
+	|	'int'
+	|	'bool'
+	;
 ID		:   [a-zA-Z_]+ ;      // match identifiers <label id="code.tour.expr.3"/>
 INT		:   [0-9]+ ;         // match integers
 BOOL	:   'true' 
