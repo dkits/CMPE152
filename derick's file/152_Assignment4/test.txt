@@ -1,0 +1,5 @@
+VAR
+    var1 : integer;
+
+BEGIN
+END.
