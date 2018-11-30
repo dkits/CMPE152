@@ -1,0 +1,37 @@
+main{
+193;
+int a, b, c; a = 6;
+bool e = false;
+if (a == 5) {
+	d = 12;
+} 
+else if (a == 4){
+	d = 1;
+	d = 3;
+}
+else{
+	d = 2;
+}
+while(x > 1){
+x = x - 1;
+x = x - 2;
+x = x - 3;
+}
+proc_two_eq(12, 2, 56);
+void proc_two_eq(help, we, yt, LOL, WAT){
+x = 2;
+
+}
+int proc_two_eq(#help, #we, #yt){
+K = as;
+x = 2;
+e = 2;
+return K;
+}
+
+void something{
+bool po = true;
+int x;
+x = 2; 
+}
+}

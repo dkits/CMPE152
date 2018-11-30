@@ -1,8 +1,9 @@
 grammar SimpleC;
 
 /** The start rule; begin parsing here. */
-prog:   stat+ ; 
-
+prog:   header '{' block '}'; 
+header: MAIN;
+block: stat+;
 stat:   expr ';' 						   #statExpr               
     |   ID '=' expr ';' 				   #statID 
     |	'{'(ID '=' expr ';')? (stat+)? '}' #statID_equals
@@ -41,6 +42,7 @@ func_synt
 	|	'int'  #funcInt
 	|	'bool' #funcBool
 	;
+MAIN    :   'main';
 ID		:   [a-zA-Z_]+ ;      // match identifiers <label id="code.tour.expr.3"/>
 INT		:   [0-9]+ ;         // match integers
 BOOL	:   'true' 
