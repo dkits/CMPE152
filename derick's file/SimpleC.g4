@@ -1,5 +1,9 @@
 grammar SimpleC;
+@header {
+#include "wci/intermediate/TypeSpec.h"
 
+using namespace wci::intermediate;
+}
 /** The start rule; begin parsing here. */
 prog:   header '{' block '}'; 
 header: MAIN;
@@ -28,7 +32,8 @@ function: func_synt ID  expr? stat ; //pass by value procedure
 	
 func_call: ID expr ';';
 
-expr:   expr ('*'|'/') expr                #exprMultDiv   
+expr locals [ TypeSpec *type = nullptr ]
+	:   expr ('*'|'/') expr                #exprMultDiv   
     |   expr ('+'|'-') expr                #exprAddSub
     |   expr ('=='|'>='|'<='|'>'|'<') expr #exprComp  
     |   '#'? INT (',' '#'? expr )?         #exprFuncInt           
