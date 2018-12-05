@@ -18,17 +18,18 @@ stat:   funcID '=' expr ';' 				   #statID
     |	'return' expr? ';'                 #statRet
     ;
     
-var_dec: var varList ('=' expr)? ';'  ;
+var_dec: varOP varList ('=' expr)? ';'  ;
 varList: varID ( ',' varID )* ;
 varID  : ID;
-    
+varOP :	'void' |'int' |'bool';
+
 if_stat:   'if' expr stat  
     	  ('else' stat)? ;
     	  
 while_stat: 'while' expr  stat ;
 
-function: var ID  expr? stat ; //pass by value procedure
-	
+function: varOP ID  expr? stat ; //pass by value procedure
+
 func_call: ID expr ';';
 
 expr locals [ TypeSpec *type = nullptr ]
@@ -40,18 +41,12 @@ expr locals [ TypeSpec *type = nullptr ]
     |	'#'? booln(',' '#'? expr )?       #exprFuncBool              
     |   '(' expr ')'                      #exprPara
     ;
-    
-var
-	:	'void' 
-	|	'int'  
-	|	'bool'
-	;
 	
 funcID   : ID;
 
 compOP   : '=='|'>='|'<='|'>'|'<';
-mulDivOp : MUL_OP | DIV_OP ;
-addSubOp : ADD_OP | SUB_OP ;
+mulDivOp : '*' | '/' ;
+addSubOp : '+' | '-' ;
 
 num  locals [ TypeSpec *type = nullptr ]
     : INT  #integerConst
@@ -61,11 +56,9 @@ booln locals [ TypeSpec *type = nullptr ]
 	: BOOL #boolConst
 	;      
     
-MUL_OP :   '*' ; DIV_OP :   '/' ;
-ADD_OP :   '+' ; SUB_OP :   '-' ;
 
 MAIN    :   'main';
-ID		:   [a-zA-Z_]+ ;      // match identifiers <label id="code.tour.expr.3"/>
+ID		:   [a-zA-Z][a-zA-Z0-9_]*;      // match identifiers <label id="code.tour.expr.3"/>
 INT		:   [0-9]+ ;         // match integers
 BOOL	:   'true' 
 		|   'false';
