@@ -33,6 +33,21 @@ public:
 	PassC2Visitor(ostream& j_file);
     virtual ~PassC2Visitor();
 
+    antlrcpp::Any visitProg(SimpleCParser::ProgContext *ctx) override;
+    antlrcpp::Any visitBlock(SimpleCParser::BlockContext *ctx) override;
+    antlrcpp::Any visitStatID(SimpleCParser::StatIDContext *ctx) override;
+    antlrcpp::Any visitStatID_equals(SimpleCParser::StatID_equalsContext *ctx) override;
+
+	antlrcpp::Any visitExprFuncID(SimpleCParser::ExprFuncIDContext *ctx) override;
+
+	antlrcpp::Any visitExprAddSub(SimpleCParser::ExprAddSubContext *ctx) override;
+	antlrcpp::Any visitExprMultDiv(SimpleCParser::ExprMultDivContext *ctx) override;
+
+	antlrcpp::Any visitIntegerConst(SimpleCParser::IntegerConstContext *ctx);
+	antlrcpp::Any visitBoolConst(SimpleCParser::BoolConstContext *ctx) override;
+
+
+
 };
 
 

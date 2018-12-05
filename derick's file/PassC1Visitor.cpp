@@ -34,72 +34,228 @@ PassC1Visitor::~PassC1Visitor() {}
 
 ostream& PassC1Visitor::get_assembly_file() { return j_file; }
 
-antlrcpp::Any PassC1Visitor::visitProg(SimpleCParser::ProgContext *ctx)
-{
-auto value = visitChildren(ctx);
+antlrcpp::Any PassC1Visitor::visitProg(SimpleCParser::ProgContext *ctx){
+	auto value = visitChildren(ctx);
 
-//    cout << "=== visitProgram: Printing xref table." << endl;
+	//    cout << "=== visitProgram: Printing xref table." << endl;
 
-    // Print the cross-reference table.
-    CrossReferencer cross_referencer;
-    cross_referencer.print(symtab_stack);
+	    // Print the cross-reference table.
+	    CrossReferencer cross_referencer;
+	    cross_referencer.print(symtab_stack);
 
-    return value;
+	    return value;
+}
+antlrcpp::Any PassC1Visitor::visitHeader(SimpleCParser::HeaderContext *ctx){
+
+    cout << "=== visitHeader: " + ctx->getText() << endl;
+
+    string program_name = ctx->MAIN()->toString();
+
+    program_id = symtab_stack->enter_local(program_name);
+    program_id->set_definition((Definition)DF_PROGRAM);
+    program_id->set_attribute((SymTabKey) ROUTINE_SYMTAB,
+                              symtab_stack->push());
+    symtab_stack->set_program_id(program_id);
+
+    // Create the assembly output file.
+    j_file.open(program_name + ".j");
+    if (j_file.fail())
+    {
+            cout << "***** Cannot open assembly file." << endl;
+            exit(-99);
+    }
+
+    // Emit the program header.
+    j_file << ".class public " << program_name << endl;
+    j_file << ".super java/lang/Object" << endl;
+
+    // Emit the RunTimer and PascalTextIn fields.
+    j_file << endl;
+    j_file << ".field private static _runTimer LRunTimer;" << endl;
+    j_file << ".field private static _standardIn LPascalTextIn;" << endl;
+
+    return visitChildren(ctx);
 }
 
-antlrcpp::Any PassC1Visitor::visitStatExpr(SimpleCParser::StatExprContext *ctx){
-	//    cout << "=== visitHeader: " + ctx->getText() << endl;
+//antlrcpp::Any PassC1Visitor::visitStatExpr(SimpleCParser::StatExprContext *ctx){}
 
-	    string program_name = ctx->expr()->toString();
+antlrcpp::Any PassC1Visitor::visitStatVar(SimpleCParser::StatVarContext *ctx){
+	//    cout << "=== visitDeclarations: " << ctx->getText() << endl;
 
-	    program_id = symtab_stack->enter_local(program_name);
-	    program_id->set_definition((Definition)DF_PROGRAM);
-	    program_id->set_attribute((SymTabKey) ROUTINE_SYMTAB,
-	                              symtab_stack->push());
-	    symtab_stack->set_program_id(program_id);
+	    auto value = visitChildren(ctx);
 
-	    // Create the assembly output file.
-	    j_file.open(program_name + ".j");
-	    if (j_file.fail())
-	    {
-	            cout << "***** Cannot open assembly file." << endl;
-	            exit(-99);
-	    }
-
-	    // Emit the program header.
-	    j_file << ".class public " << program_name << endl;
-	    j_file << ".super java/lang/Object" << endl;
-
-	    // Emit the RunTimer and PascalTextIn fields.
+	    // Emit the class constructor.
 	    j_file << endl;
-	    j_file << ".field private static _runTimer LRunTimer;" << endl;
-	    j_file << ".field private static _standardIn LPascalTextIn;" << endl;
+	    j_file << ".method public <init>()V" << endl;
+	    j_file << endl;
+	    j_file << "\taload_0" << endl;
+	    j_file << "\tinvokenonvirtual    java/lang/Object/<init>()V" << endl;
+	    j_file << "\treturn" << endl;
+	    j_file << endl;
+	    j_file << ".limit locals 1" << endl;
+	    j_file << ".limit stack 1" << endl;
+	    j_file << ".end method" << endl;
 
-	    return visitChildren(ctx);
+	    return value;
 }
-//antlrcpp::Any PassC1Visitor::visitStatID(SimpleCParser::StatIDContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitStatID_equals(SimpleCParser::StatID_equalsContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitStatVar(SimpleCParser::StatVarContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitStatIf(SimpleCParser::StatIfContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitStatWhile(SimpleCParser::StatWhileContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitStatFunc(SimpleCParser::StatFuncContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitStatCall(SimpleCParser::StatCallContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitStatRet(SimpleCParser::StatRetContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitVarInt(SimpleCParser::VarIntContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitVarBool(SimpleCParser::VarBoolContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitIf_stat(SimpleCParser::If_statContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitWhile_stat(SimpleCParser::While_statContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitFunction(SimpleCParser::FunctionContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitFunc_call(SimpleCParser::Func_callContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitExprMultDiv(SimpleCParser::ExprMultDivContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitExprFuncInt(SimpleCParser::ExprFuncIntContext *ctx){}
+antlrcpp::Any PassC1Visitor::visitVar_dec(SimpleCParser::Var_decContext *ctx){
+	  j_file << "\n; " << ctx->getText() << "\n" << endl;
+	  return visitChildren(ctx);
+}
+antlrcpp::Any PassC1Visitor::visitVarList(SimpleCParser::VarListContext *ctx)
+{
+//    cout << "=== visitVarList: " + ctx->getText() << endl;
+    variable_id_list.resize(0);
+    return visitChildren(ctx);
+}
+antlrcpp::Any PassC1Visitor::visitVarID(SimpleCParser::VarIDContext *ctx)
+{
+//    cout << "=== visitVarId: " + ctx->getText() << endl;
+
+    string variable_name = ctx->ID()->toString();
+    SymTabEntry *variable_id = symtab_stack->enter_local(variable_name);
+    variable_id->set_definition((Definition) DF_VARIABLE);
+    variable_id_list.push_back(variable_id);
+
+    return visitChildren(ctx);
+}
+antlrcpp::Any PassC1Visitor::visitVar(SimpleCParser::VarContext *ctx){
+//    cout << "=== visitTypeId: " + ctx->getText() << endl;
+
+    TypeSpec *type;
+    string type_indicator;
+
+    string type_name = ctx->toString();
+    if (type_name == "int")
+    {
+        type = Predefined::integer_type;
+        type_indicator = "I";
+    }
+    else if (type_name == "bool")
+    {
+        type = Predefined::boolean_type;
+        type_indicator = "B";
+    }
+    else
+    {
+        type = nullptr;
+        type_indicator = "?";
+    }
+
+    for (SymTabEntry *id : variable_id_list) {
+        id->set_typespec(type);
+
+        // Emit a field declaration.
+        j_file << ".field private static "
+               << id->get_name() << " " << type_indicator << endl;
+    }
+
+    return visitChildren(ctx);
+}
+//antlrcpp::Any PassC1Visitor::visitExprFuncID(SimpleCParser::ExprFuncIDContext *ctx){
+//	//    cout << "=== visitVariableExpr: " + ctx->getText() << endl;
+//
+//	    string variable_name = ctx->funcID()->ID()->toString();
+//	    SymTabEntry *variable_id = symtab_stack->lookup(variable_name);
+//
+//	    ctx->type = variable_id->get_typespec();
+//	    return visitChildren(ctx);
+//}
+
+////antlrcpp::Any PassC1Visitor::visitStatIf(SimpleCParser::StatIfContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitStatWhile(SimpleCParser::StatWhileContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitStatFunc(SimpleCParser::StatFuncContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitStatCall(SimpleCParser::StatCallContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitStatRet(SimpleCParser::StatRetContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitVarInt(SimpleCParser::VarIntContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitVarBool(SimpleCParser::VarBoolContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitIf_stat(SimpleCParser::If_statContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitWhile_stat(SimpleCParser::While_statContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitFunction(SimpleCParser::FunctionContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitFunc_call(SimpleCParser::Func_callContext *ctx){}
+antlrcpp::Any PassC1Visitor::visitExprMultDiv(SimpleCParser::ExprMultDivContext *ctx){
+	//    cout << "=== visitMulDivExpr: " + ctx->getText() << endl;
+
+	    auto value = visitChildren(ctx);
+
+	    TypeSpec *type1 = ctx->expr(0)->type;
+	    TypeSpec *type2 = ctx->expr(1)->type;
+
+	    bool integer_mode =    (type1 == Predefined::integer_type)
+	                        && (type2 == Predefined::integer_type);
+	    bool real_mode    =    (type1 == Predefined::real_type)
+	                        && (type2 == Predefined::real_type);
+
+	    TypeSpec *type = integer_mode ? Predefined::integer_type
+	                   : real_mode    ? Predefined::real_type
+	                   :                nullptr;
+	    ctx->type = type;
+
+	    return value;
+}
+antlrcpp::Any PassC1Visitor::visitExprFuncInt(SimpleCParser::ExprFuncIntContext *ctx){
+	//    cout << "=== visitUnsignedNumberExpr: " + ctx->getText() << endl;
+
+	    auto value = visit(ctx->num());
+	    ctx->type = ctx->num()->type;
+	    return value;
+
+}
+
+
 //antlrcpp::Any PassC1Visitor::visitExprComp(SimpleCParser::ExprCompContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitExprAddSub(SimpleCParser::ExprAddSubContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitExprPara(SimpleCParser::ExprParaContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitExprFuncID(SimpleCParser::ExprFuncIDContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitExprFuncBool(SimpleCParser::ExprFuncBoolContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitFuncVoid(SimpleCParser::FuncVoidContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitFuncInt(SimpleCParser::FuncIntContext *ctx){}
-//antlrcpp::Any PassC1Visitor::visitFuncBool(SimpleCParser::FuncBoolContext *ctx){}
+antlrcpp::Any PassC1Visitor::visitExprAddSub(SimpleCParser::ExprAddSubContext *ctx){
+	//    cout << "=== visitAddSubExpr: " + ctx->getText() << endl;
 
+	    auto value = visitChildren(ctx);
 
+	    TypeSpec *type1 = ctx->expr(0)->type;
+	    TypeSpec *type2 = ctx->expr(1)->type;
+
+	    bool integer_mode =    (type1 == Predefined::integer_type)
+	                        && (type2 == Predefined::integer_type);
+	    bool real_mode    =    (type1 == Predefined::real_type)
+	                        && (type2 == Predefined::real_type);
+
+	    TypeSpec *type = integer_mode ? Predefined::integer_type
+	                   : real_mode    ? Predefined::real_type
+	                   :                nullptr;
+	    ctx->type = type;
+
+	    return value;
+
+}
+antlrcpp::Any PassC1Visitor::visitExprPara(SimpleCParser::ExprParaContext *ctx){
+	//    cout << "=== visitParenExpr: " + ctx->getText() << endl;
+
+		auto value = visitChildren(ctx);
+	    ctx->type = ctx->expr()->type;
+	    return value;
+}
+
+antlrcpp::Any PassC1Visitor::visitExprFuncBool(SimpleCParser::ExprFuncBoolContext *ctx){
+		auto value = visit(ctx->booln());
+		ctx->type = ctx->booln()->type;
+		return value;
+}
+
+antlrcpp::Any PassC1Visitor::visitIntegerConst(SimpleCParser::IntegerConstContext *ctx)
+{
+//    cout << "=== visitIntegerConst: " + ctx->getText() << endl;
+
+    ctx->type = Predefined::integer_type;
+    return visitChildren(ctx);
+}
+
+antlrcpp::Any PassC1Visitor::visitBoolConst(SimpleCParser::BoolConstContext *ctx)
+{
+//    cout << "=== visitFloatConst: " + ctx->getText() << endl;
+
+    ctx->type = Predefined::boolean_type;
+    return visitChildren(ctx);
+}
+////antlrcpp::Any PassC1Visitor::visitFuncVoid(SimpleCParser::FuncVoidContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitFuncInt(SimpleCParser::FuncIntContext *ctx){}
+////antlrcpp::Any PassC1Visitor::visitFuncBool(SimpleCParser::FuncBoolContext *ctx){}
+//
+//
