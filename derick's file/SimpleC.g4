@@ -5,11 +5,11 @@ grammar SimpleC;
 using namespace wci::intermediate;
 }
 /** The start rule; begin parsing here. */
-prog:   header '{' block '}'; 
+prog:   header block ; 
 header: MAIN;
-block: stat+;
+block: '{'stat+'}';
 stat:   funcID '=' expr ';' 				   #statID 
-    |	'{'(funcID '=' expr ';')? (stat+)? '}' #statID_equals
+//    |	'{'(funcID '=' expr ';')? (stat+)? '}' #statID_equals
     | 	var_dec			                   #statVar
     | 	if_stat							   #statIf
     |	while_stat                         #statWhile
@@ -21,14 +21,14 @@ stat:   funcID '=' expr ';' 				   #statID
 var_dec: varOP varList ('=' expr)? ';'  ;
 varList: varID ( ',' varID )* ;
 varID  : ID;
-varOP :	'void' |'int' |'bool';
+varOP :	'int' |'bool';
 
-if_stat:   'if' expr stat  
-    	  ('else' stat)? ;
+if_stat:   'if' expr '{' stat* '}'  
+    	  ('else' (if_stat | '{' stat* '}')? )? ;
     	  
-while_stat: 'while' expr  stat ;
+while_stat: 'while' expr '{' stat* '}';
 
-function: varOP ID  expr? stat ; //pass by value procedure
+function: (varOP|'void') ID  expr? '{' stat* '}' ; //pass by value procedure
 
 func_call: ID expr ';';
 
@@ -36,9 +36,9 @@ expr locals [ TypeSpec *type = nullptr ]
 	:   expr mulDivOp expr                #exprMultDiv   
     |   expr addSubOp expr                #exprAddSub
     |   expr compOP   expr                #exprComp  
-    |   '#'? num   (',' '#'? expr )?      #exprFuncInt           
-    |   '#'? funcID (',' '#'? expr )?     #exprFuncID    
-    |	'#'? booln(',' '#'? expr )?       #exprFuncBool              
+    |   num         #exprFuncInt           
+    |   funcID      #exprFuncID    
+    |	booln       #exprFuncBool              
     |   '(' expr ')'                      #exprPara
     ;
 	
