@@ -5,7 +5,7 @@ grammar SimpleC;
 using namespace wci::intermediate;
 }
 /** The start rule; begin parsing here. */
-prog:   header block ; 
+prog:   header block function*; 
 header: MAIN;
 block: '{'stat+'}';
 stat:   funcID '=' expr ';' 				   #statID 
@@ -15,6 +15,7 @@ stat:   funcID '=' expr ';' 				   #statID
     |	while_stat                         #statWhile
     |	function                           #statFunc
     |	func_call                          #statCall
+    |   print                              #statPrint
     |	'return' expr? ';'                 #statRet
     ;
     
@@ -22,6 +23,9 @@ var_dec: varOP varList ('=' expr)? ';'  ;
 varList: varID ( ',' varID )* ;
 varID  : ID;
 varOP :	'int' |'bool';
+
+print: PRINT'('string+')' ';';  //add string or expr for here. Printf
+
 
 if_stat:   'if' expr '{' stat* '}'  
     	  ('else' (if_stat | '{' stat* '}')? )? ;
@@ -43,6 +47,8 @@ expr locals [ TypeSpec *type = nullptr ]
     ;
 	
 funcID   : ID;
+string: ID;
+
 
 compOP   : '=='|'>='|'<='|'>'|'<';
 mulDivOp : '*' | '/' ;
@@ -58,6 +64,7 @@ booln locals [ TypeSpec *type = nullptr ]
     
 
 MAIN    :   'main';
+PRINT   :   'print';
 ID		:   [a-zA-Z][a-zA-Z0-9_]*;      // match identifiers <label id="code.tour.expr.3"/>
 INT		:   [0-9]+ ;         // match integers
 BOOL	:   'true' 
