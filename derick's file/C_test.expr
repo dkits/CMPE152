@@ -1,0 +1,9 @@
+BIGMAIN{
+VARLIST{
+e ->bool;
+d -> float;
+a, x->int; 
+}
+a = 6;
+d = 1.1;
+}

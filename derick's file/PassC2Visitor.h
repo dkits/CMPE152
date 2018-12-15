@@ -35,16 +35,21 @@ public:
 
     antlrcpp::Any visitProg(SimpleCParser::ProgContext *ctx) override;
     antlrcpp::Any visitBlock(SimpleCParser::BlockContext *ctx) override;
-    antlrcpp::Any visitStatID(SimpleCParser::StatIDContext *ctx) override;
-    antlrcpp::Any visitStatID_equals(SimpleCParser::StatID_equalsContext *ctx) override;
+    antlrcpp::Any visitStat(SimpleCParser::StatContext *ctx) override;
+    antlrcpp::Any visitHeader(SimpleCParser::HeaderContext *ctx) override;
 
-	antlrcpp::Any visitExprFuncID(SimpleCParser::ExprFuncIDContext *ctx) override;
 
+    antlrcpp::Any visitAssignment_stat(SimpleCParser::Assignment_statContext *ctx) override;
+	antlrcpp::Any visitIf_stat(SimpleCParser::If_statContext *ctx) override;
+
+	antlrcpp::Any visitExprVari(SimpleCParser::ExprVariContext *ctx) override;
 	antlrcpp::Any visitExprAddSub(SimpleCParser::ExprAddSubContext *ctx) override;
 	antlrcpp::Any visitExprMultDiv(SimpleCParser::ExprMultDivContext *ctx) override;
+	antlrcpp::Any visitExprComp(SimpleCParser::ExprCompContext *ctx) override;
 
 	antlrcpp::Any visitIntegerConst(SimpleCParser::IntegerConstContext *ctx);
 	antlrcpp::Any visitBoolConst(SimpleCParser::BoolConstContext *ctx) override;
+    antlrcpp::Any visitFloatConst(SimpleCParser::FloatConstContext *ctx) override;
 
 
 

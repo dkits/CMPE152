@@ -49,7 +49,7 @@ antlrcpp::Any PassC1Visitor::visitHeader(SimpleCParser::HeaderContext *ctx){
 
     cout << "=== visitHeader: " + ctx->getText() << endl;
 
-    string program_name = ctx->MAIN()->toString();
+    string program_name = ctx->BIGMAIN()->toString();
 
     program_id = symtab_stack->enter_local(program_name);
     program_id->set_definition((Definition)DF_PROGRAM);
@@ -77,10 +77,9 @@ antlrcpp::Any PassC1Visitor::visitHeader(SimpleCParser::HeaderContext *ctx){
     return visitChildren(ctx);
 }
 
-//antlrcpp::Any PassC1Visitor::visitStatExpr(SimpleCParser::StatExprContext *ctx){}
 
-antlrcpp::Any PassC1Visitor::visitStatVar(SimpleCParser::StatVarContext *ctx){
-	//    cout << "=== visitDeclarations: " << ctx->getText() << endl;
+antlrcpp::Any PassC1Visitor::visitVar_table(SimpleCParser::Var_tableContext *ctx){
+//	    cout << "=== visitDeclarations: " << ctx->getText() << endl;
 
 	    auto value = visitChildren(ctx);
 
@@ -96,9 +95,11 @@ antlrcpp::Any PassC1Visitor::visitStatVar(SimpleCParser::StatVarContext *ctx){
 	    j_file << ".limit stack 1" << endl;
 	    j_file << ".end method" << endl;
 
+
 	    return value;
 }
 antlrcpp::Any PassC1Visitor::visitVar_dec(SimpleCParser::Var_decContext *ctx){
+
 	  j_file << "\n; " << ctx->getText() << "\n" << endl;
 	  return visitChildren(ctx);
 }
@@ -106,6 +107,7 @@ antlrcpp::Any PassC1Visitor::visitVarList(SimpleCParser::VarListContext *ctx)
 {
 //    cout << "=== visitVarList: " + ctx->getText() << endl;
     variable_id_list.resize(0);
+
     return visitChildren(ctx);
 }
 antlrcpp::Any PassC1Visitor::visitVarID(SimpleCParser::VarIDContext *ctx)
@@ -117,15 +119,15 @@ antlrcpp::Any PassC1Visitor::visitVarID(SimpleCParser::VarIDContext *ctx)
     variable_id->set_definition((Definition) DF_VARIABLE);
     variable_id_list.push_back(variable_id);
 
+
     return visitChildren(ctx);
 }
-antlrcpp::Any PassC1Visitor::visitVar(SimpleCParser::VarContext *ctx){
+antlrcpp::Any PassC1Visitor::visitVarOP(SimpleCParser::VarOPContext *ctx){
 //    cout << "=== visitTypeId: " + ctx->getText() << endl;
-
     TypeSpec *type;
     string type_indicator;
 
-    string type_name = ctx->toString();
+    string type_name = ctx->getText();
     if (type_name == "int")
     {
         type = Predefined::integer_type;
@@ -136,6 +138,11 @@ antlrcpp::Any PassC1Visitor::visitVar(SimpleCParser::VarContext *ctx){
         type = Predefined::boolean_type;
         type_indicator = "B";
     }
+    else if (type_name == "float")
+    {
+        type = Predefined::real_type;
+        type_indicator = "F";
+    }
     else
     {
         type = nullptr;
@@ -143,57 +150,99 @@ antlrcpp::Any PassC1Visitor::visitVar(SimpleCParser::VarContext *ctx){
     }
 
     for (SymTabEntry *id : variable_id_list) {
+//        cout << " " << type_indicator << " ";
+
+//    	cout << id->get_name() << type_indicator << " ";
         id->set_typespec(type);
 
-        // Emit a field declaration.
+        // Emit a field declaration
         j_file << ".field private static "
                << id->get_name() << " " << type_indicator << endl;
     }
 
     return visitChildren(ctx);
 }
-//antlrcpp::Any PassC1Visitor::visitExprFuncID(SimpleCParser::ExprFuncIDContext *ctx){
-//	//    cout << "=== visitVariableExpr: " + ctx->getText() << endl;
-//
-//	    string variable_name = ctx->funcID()->ID()->toString();
-//	    SymTabEntry *variable_id = symtab_stack->lookup(variable_name);
-//
-//	    ctx->type = variable_id->get_typespec();
-//	    return visitChildren(ctx);
-//}
 
-////antlrcpp::Any PassC1Visitor::visitStatIf(SimpleCParser::StatIfContext *ctx){}
-////antlrcpp::Any PassC1Visitor::visitStatWhile(SimpleCParser::StatWhileContext *ctx){}
-////antlrcpp::Any PassC1Visitor::visitStatFunc(SimpleCParser::StatFuncContext *ctx){}
-////antlrcpp::Any PassC1Visitor::visitStatCall(SimpleCParser::StatCallContext *ctx){}
-////antlrcpp::Any PassC1Visitor::visitStatRet(SimpleCParser::StatRetContext *ctx){}
-////antlrcpp::Any PassC1Visitor::visitVarInt(SimpleCParser::VarIntContext *ctx){}
-////antlrcpp::Any PassC1Visitor::visitVarBool(SimpleCParser::VarBoolContext *ctx){}
-////antlrcpp::Any PassC1Visitor::visitIf_stat(SimpleCParser::If_statContext *ctx){}
+
+antlrcpp::Any PassC1Visitor::visitExprVari(SimpleCParser::ExprVariContext *ctx){
+//	    cout << "=== visitVariableExpr: " + ctx->getText() << endl;
+
+	    string variable_name = ctx->vari()->ID()->toString();
+	    SymTabEntry *variable_id = symtab_stack->lookup(variable_name);
+
+	    ctx->type = variable_id->get_typespec();
+	    return visitChildren(ctx);
+}
+
+
+
 ////antlrcpp::Any PassC1Visitor::visitWhile_stat(SimpleCParser::While_statContext *ctx){}
 ////antlrcpp::Any PassC1Visitor::visitFunction(SimpleCParser::FunctionContext *ctx){}
 ////antlrcpp::Any PassC1Visitor::visitFunc_call(SimpleCParser::Func_callContext *ctx){}
 antlrcpp::Any PassC1Visitor::visitExprMultDiv(SimpleCParser::ExprMultDivContext *ctx){
 	//    cout << "=== visitMulDivExpr: " + ctx->getText() << endl;
 
-	    auto value = visitChildren(ctx);
+    auto value = visitChildren(ctx);
 
-	    TypeSpec *type1 = ctx->expr(0)->type;
-	    TypeSpec *type2 = ctx->expr(1)->type;
+    TypeSpec *type1 = ctx->expr(0)->type;
+    TypeSpec *type2 = ctx->expr(1)->type;
 
-	    bool integer_mode =    (type1 == Predefined::integer_type)
-	                        && (type2 == Predefined::integer_type);
-	    bool real_mode    =    (type1 == Predefined::real_type)
-	                        && (type2 == Predefined::real_type);
+    bool integer_mode =    (type1 == Predefined::integer_type)
+                        && (type2 == Predefined::integer_type);
+    bool real_mode    =    (type1 == Predefined::real_type)
+                        && (type2 == Predefined::real_type);
 
-	    TypeSpec *type = integer_mode ? Predefined::integer_type
-	                   : real_mode    ? Predefined::real_type
-	                   :                nullptr;
-	    ctx->type = type;
+    TypeSpec *type = integer_mode ? Predefined::integer_type
+                   : real_mode    ? Predefined::real_type
+                   :                nullptr;
+    ctx->type = type;
 
-	    return value;
+    return value;
 }
-antlrcpp::Any PassC1Visitor::visitExprFuncInt(SimpleCParser::ExprFuncIntContext *ctx){
+
+
+antlrcpp::Any PassC1Visitor::visitExprAddSub(SimpleCParser::ExprAddSubContext *ctx){
+	//    cout << "=== visitAddSubExpr: " + ctx->getText() << endl;
+
+    auto value = visitChildren(ctx);
+
+    TypeSpec *type1 = ctx->expr(0)->type;
+    TypeSpec *type2 = ctx->expr(1)->type;
+
+    bool integer_mode =    (type1 == Predefined::integer_type)
+                        && (type2 == Predefined::integer_type);
+    bool real_mode    =    (type1 == Predefined::real_type)
+                        && (type2 == Predefined::real_type);
+
+    TypeSpec *type = integer_mode ? Predefined::integer_type
+                   : real_mode    ? Predefined::real_type
+                   :                nullptr;
+    ctx->type = type;
+
+    return value;
+}
+antlrcpp::Any PassC1Visitor::visitExprComp(SimpleCParser::ExprCompContext *ctx){
+    auto value = visitChildren(ctx);
+
+    TypeSpec *type1 = ctx->expr(0)->type;
+    TypeSpec *type2 = ctx->expr(1)->type;
+
+    bool integer_mode =    (type1 == Predefined::integer_type)
+                        && (type2 == Predefined::integer_type);
+    bool bool_mode    =    (type1 == Predefined::boolean_type)
+                        && (type2 == Predefined::boolean_type);
+    bool real_mode    =    (type1 == Predefined::real_type)
+                        && (type2 == Predefined::real_type);
+
+    TypeSpec *type = integer_mode ? Predefined::integer_type
+                   : bool_mode    ? Predefined::boolean_type
+                   : real_mode    ? Predefined::real_type
+                   :                nullptr;
+    ctx->type = type;
+
+    return value;
+}
+antlrcpp::Any PassC1Visitor::visitExprInt(SimpleCParser::ExprIntContext *ctx){
 	//    cout << "=== visitUnsignedNumberExpr: " + ctx->getText() << endl;
 
 	    auto value = visit(ctx->num());
@@ -202,38 +251,14 @@ antlrcpp::Any PassC1Visitor::visitExprFuncInt(SimpleCParser::ExprFuncIntContext 
 
 }
 
-
-//antlrcpp::Any PassC1Visitor::visitExprComp(SimpleCParser::ExprCompContext *ctx){}
-antlrcpp::Any PassC1Visitor::visitExprAddSub(SimpleCParser::ExprAddSubContext *ctx){
-	//    cout << "=== visitAddSubExpr: " + ctx->getText() << endl;
-
-	    auto value = visitChildren(ctx);
-
-	    TypeSpec *type1 = ctx->expr(0)->type;
-	    TypeSpec *type2 = ctx->expr(1)->type;
-
-	    bool integer_mode =    (type1 == Predefined::integer_type)
-	                        && (type2 == Predefined::integer_type);
-	    bool real_mode    =    (type1 == Predefined::real_type)
-	                        && (type2 == Predefined::real_type);
-
-	    TypeSpec *type = integer_mode ? Predefined::integer_type
-	                   : real_mode    ? Predefined::real_type
-	                   :                nullptr;
-	    ctx->type = type;
-
-	    return value;
-
-}
 antlrcpp::Any PassC1Visitor::visitExprPara(SimpleCParser::ExprParaContext *ctx){
 	//    cout << "=== visitParenExpr: " + ctx->getText() << endl;
-
 		auto value = visitChildren(ctx);
 	    ctx->type = ctx->expr()->type;
 	    return value;
 }
-
-antlrcpp::Any PassC1Visitor::visitExprFuncBool(SimpleCParser::ExprFuncBoolContext *ctx){
+//
+antlrcpp::Any PassC1Visitor::visitExprBool(SimpleCParser::ExprBoolContext *ctx){
 		auto value = visit(ctx->booln());
 		ctx->type = ctx->booln()->type;
 		return value;
@@ -254,6 +279,50 @@ antlrcpp::Any PassC1Visitor::visitBoolConst(SimpleCParser::BoolConstContext *ctx
     ctx->type = Predefined::boolean_type;
     return visitChildren(ctx);
 }
+antlrcpp::Any PassC1Visitor::visitFloatConst(SimpleCParser::FloatConstContext *ctx){
+//    cout << "=== visitFloatConst: " + ctx->getText() << endl;
+
+    ctx->type = Predefined::real_type;
+    return visitChildren(ctx);
+}
+antlrcpp::Any PassC1Visitor::visitPrint(SimpleCParser::PrintContext *ctx){
+
+//	auto value = visitChildren(ctx);
+//   // ctx->type = ctx->ID()->type;
+//  //  j_file << "\tldc\t" << ctx->getText() << endl;
+//
+//	j_file << ".method public static main([Ljava/lang/String;)V" << endl;
+//	j_file << " " << endl;
+//	j_file<< "getstatic java/lang/System/out Ljava/io/PrintStream;" << endl;
+////	   j_file << "ldc Hello"<< endl; // do not hard code this
+//	j_file << "ldc " << ctx->string()->getText() << endl;
+//	j_file << "invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V" << endl;
+//
+//	 j_file <<  " return "<< endl;
+//	 j_file <<  ".limit locals 16 "<< endl;
+//	 j_file << ".limit stack 16" << endl;
+//	 j_file <<  ".end method" << endl;
+	  return visitChildren(ctx);
+}
+antlrcpp::Any PassC1Visitor::visitString(SimpleCParser::StringContext *ctx){
+	auto value = visitChildren(ctx);
+   // ctx->type = ctx->ID()->type;
+  //  j_file << "\tldc\t" << ctx->getText() << endl;
+
+	j_file << ".method public static main([Ljava/lang/String;)V" << endl;
+	j_file << " " << endl;
+	j_file<< "getstatic java/lang/System/out Ljava/io/PrintStream;" << endl;
+//	   j_file << "ldc Hello"<< endl; // do not hard code this
+	j_file << "ldc " << ctx->getText() << endl;
+	j_file << "invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V" << endl;
+
+	 j_file <<  " return "<< endl;
+	 j_file <<  ".limit locals 16 "<< endl;
+	 j_file << ".limit stack 16" << endl;
+	 j_file <<  ".end method" << endl;
+	return visitChildren(ctx);
+}
+
 ////antlrcpp::Any PassC1Visitor::visitFuncVoid(SimpleCParser::FuncVoidContext *ctx){}
 ////antlrcpp::Any PassC1Visitor::visitFuncInt(SimpleCParser::FuncIntContext *ctx){}
 ////antlrcpp::Any PassC1Visitor::visitFuncBool(SimpleCParser::FuncBoolContext *ctx){}
