@@ -38,7 +38,7 @@ antlrcpp::Any PassC2Visitor::visitHeader(SimpleCParser::HeaderContext *ctx){
 antlrcpp::Any PassC2Visitor::visitBlock(SimpleCParser::BlockContext *ctx){
 	    // Emit the main program header.
 	    j_file << endl;
-	    j_file << ".method public static main([Ljava/lang/String;)V" << endl;
+	//    j_file << ".method public static main([Ljava/lang/String;)V" << endl;
 	    j_file << endl;
 	    j_file << "\tnew RunTimer" << endl;
 	    j_file << "\tdup" << endl;
@@ -265,7 +265,9 @@ antlrcpp::Any PassC2Visitor::visitIntegerConst(SimpleCParser::IntegerConstContex
 antlrcpp::Any PassC2Visitor::visitBoolConst(SimpleCParser::BoolConstContext  *ctx)
 {
     // Emit a load constant instruction.
-    j_file << "\tldc\t" << ctx->getText() << endl;
+    string boolean_flag = (ctx->BOOL()->getText() == "true") ? "1" : "0";
+    // Emit a load constant instruction.
+    j_file << "\tldc\t" << boolean_flag << endl;
 
     return visitChildren(ctx);
 }
@@ -276,3 +278,17 @@ antlrcpp::Any PassC2Visitor::visitFloatConst(SimpleCParser::FloatConstContext *c
 
     return visitChildren(ctx);
 }
+antlrcpp::Any PassC2Visitor::visitFunction(SimpleCParser::FunctionContext *ctx) {
+	 string func_name = ctx->ID()->getText() + "_";
+	j_file << "\tgoto " << func_name << "end" << endl;
+
+		 	 j_file << ctx->ID()->getText() << ":" << endl;
+
+		 	 j_file << "\tastore_1" << endl;
+
+		 	 j_file << "\tret 1" << endl;
+		 	 j_file << func_name << "end:" << endl;
+		 	 func_name = "";
+		    return visitChildren(ctx);
+}
+

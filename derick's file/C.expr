@@ -1,0 +1,45 @@
+BIGMAIN{
+VARLIST{
+e ->bool;
+d -> float;
+a, x->int; 
+}
+a = 6;
+e = false;
+d = 1.1;
+print(Hello World);
+if (a == 5) {
+	d = 12.2;
+} 
+else if (a == 4){
+	d = 1;
+	d = 3;
+}
+else{
+	d = 2;
+}
+x = 12;
+while(x > 1){
+x = x - 1;
+x = x - 2;
+x = x - 3;
+}
+proc_two_eq(x);
+}
+void proc_two_eq(x){
+x = 2;
+
+}
+int proc_two_eq(x){
+x = 2;
+a = 2;
+return a;
+}
+
+void something{
+VARLIST{
+po->bool;
+y->int;
+}
+y = 2; 
+}

@@ -85,15 +85,15 @@ antlrcpp::Any PassC1Visitor::visitVar_table(SimpleCParser::Var_tableContext *ctx
 
 	    // Emit the class constructor.
 	    j_file << endl;
-	    j_file << ".method public <init>()V" << endl;
+	//    j_file << ".method public <init>()V" << endl;
 	    j_file << endl;
-	    j_file << "\taload_0" << endl;
-	    j_file << "\tinvokenonvirtual    java/lang/Object/<init>()V" << endl;
-	    j_file << "\treturn" << endl;
+//	    j_file << "\taload_0" << endl;
+//	    j_file << "\tinvokenonvirtual    java/lang/Object/<init>()V" << endl;
+//	    j_file << "\treturn" << endl;
 	    j_file << endl;
-	    j_file << ".limit locals 1" << endl;
+	/*    j_file << ".limit locals 1" << endl;
 	    j_file << ".limit stack 1" << endl;
-	    j_file << ".end method" << endl;
+	    j_file << ".end method" << endl;*/
 
 
 	    return value;
@@ -308,7 +308,6 @@ antlrcpp::Any PassC1Visitor::visitString(SimpleCParser::StringContext *ctx){
 	auto value = visitChildren(ctx);
    // ctx->type = ctx->ID()->type;
   //  j_file << "\tldc\t" << ctx->getText() << endl;
-
 	j_file << ".method public static main([Ljava/lang/String;)V" << endl;
 	j_file << " " << endl;
 	j_file<< "getstatic java/lang/System/out Ljava/io/PrintStream;" << endl;
@@ -316,10 +315,10 @@ antlrcpp::Any PassC1Visitor::visitString(SimpleCParser::StringContext *ctx){
 	j_file << "ldc " << ctx->getText() << endl;
 	j_file << "invokevirtual java/io/PrintStream/println(Ljava/lang/String;)V" << endl;
 
-	 j_file <<  " return "<< endl;
+/*	 j_file <<  " return "<< endl;
 	 j_file <<  ".limit locals 16 "<< endl;
 	 j_file << ".limit stack 16" << endl;
-	 j_file <<  ".end method" << endl;
+	 j_file <<  ".end method" << endl;*/
 	return visitChildren(ctx);
 }
 

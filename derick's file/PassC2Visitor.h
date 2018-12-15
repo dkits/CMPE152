@@ -50,7 +50,7 @@ public:
 	antlrcpp::Any visitIntegerConst(SimpleCParser::IntegerConstContext *ctx);
 	antlrcpp::Any visitBoolConst(SimpleCParser::BoolConstContext *ctx) override;
     antlrcpp::Any visitFloatConst(SimpleCParser::FloatConstContext *ctx) override;
-
+    antlrcpp::Any visitFunction(SimpleCParser::FunctionContext *ctx) override;
 
 
 };
